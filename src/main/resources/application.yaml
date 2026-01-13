@@ -24,6 +24,7 @@ spring:
         use_sql_comments: true
   flyway:
     enabled: true
+    clean-disabled: false
     baseline-version: 0
     out-of-order: true
 

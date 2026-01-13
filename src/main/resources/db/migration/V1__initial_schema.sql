@@ -211,7 +211,7 @@ CREATE TABLE stage_records (
 -- ============================================================================
 DROP TABLE IF EXISTS match_history;
 CREATE TABLE match_history (
-    match_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    match_id BIGINT AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
     
     world_number INT NOT NULL,
@@ -239,7 +239,7 @@ CREATE TABLE match_history (
     started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     completed_at DATETIME NULL,
     
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    PRIMARY KEY (match_id, started_at),
     
     INDEX idx_match_user_time (user_id, started_at DESC),
     INDEX idx_match_stage (world_number, stage_number, difficulty),

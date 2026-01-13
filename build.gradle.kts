@@ -1,3 +1,9 @@
+buildscript {
+	dependencies {
+		classpath("org.flywaydb:flyway-mysql:11.18.0")
+	}
+}
+
 plugins {
 	java
 	war
@@ -28,25 +34,29 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-flyway")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
-
 	compileOnly("org.projectlombok:lombok")
-	runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
 	annotationProcessor("org.projectlombok:lombok")
 	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat-runtime")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	// https://mvnrepository.com/artifact/org.flywaydb/flyway-core
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.flywaydb:flyway-mysql")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-log4j2
+//    implementation("org.springframework.boot:spring-boot-starter-log4j2:4.0.0")
+	// https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
+	implementation("org.mariadb.jdbc:mariadb-java-client:3.5.6")
+// https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
 }
 
 flyway {
 	url = "jdbc:mariadb://146.56.105.224:3306/SCORE_ARCHERY"
 	user = "sarchery"
-	password = "20260112As!!"
+	password = "20260112As!"
 	baselineVersion = "0"
+	cleanDisabled = false
 }
 
 
