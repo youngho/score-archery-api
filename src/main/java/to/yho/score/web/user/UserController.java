@@ -17,10 +17,17 @@ public class UserController {
 
     @Operation(summary = "Register a new user", description = "Creates a new user account with basic profile information")
     @PostMapping("/register")
-    public User register(@RequestBody RegisterRequest request) {
-        return userService.registerUser(
+    public UserResponse register(@RequestBody RegisterRequest request) {
+        User user = userService.registerUser(
                 request.getUsername(),
                 request.getEmail(),
                 request.getPassword());
+        return UserResponse.from(user);
+    }
+
+    @Operation(summary = "Get user by public ID", description = "Fetches a user using public_id (safe for external exposure)")
+    @GetMapping("/{publicId}")
+    public UserResponse getByPublicId(@PathVariable String publicId) {
+        return UserResponse.from(userService.getUserByPublicId(publicId));
     }
 }

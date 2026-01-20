@@ -24,6 +24,10 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
+    @Schema(description = "Public identifier exposed to clients", example = "b8Zk2Qp1fZ0qW3mN7aLx9B")
+    @Column(name = "public_id", nullable = false, unique = true, length = 22)
+    private String publicId;
+
     @Schema(description = "User's unique username", example = "john_doe")
     @Column(nullable = false, unique = true, length = 50)
     private String username;
