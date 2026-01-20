@@ -10,9 +10,6 @@ public class RegisterRequest {
     @Schema(description = "User's nickname", example = "john_doe")
     private String nickname;
 
-    @Schema(description = "User's email address", example = "john@example.com")
-    private String email;
-
     @Schema(description = "User's password", example = "password123")
     private String password;
 }

@@ -32,9 +32,6 @@ public class User {
     @Column(nullable = false, unique = true, length = 50)
     private String nickname;
 
-    @Column(unique = true)
-    private String email;
-
     private String passwordHash;
 
     private String avatarUrl;

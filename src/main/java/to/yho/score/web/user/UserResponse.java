@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 public class UserResponse {
     private String publicId;
     private String nickname;
-    private String email;
     private String avatarUrl;
     private Integer level;
     private Long experiencePoints;
@@ -25,7 +24,6 @@ public class UserResponse {
         return UserResponse.builder()
                 .publicId(user.getPublicId())
                 .nickname(user.getNickname())
-                .email(user.getEmail())
                 .avatarUrl(user.getAvatarUrl())
                 .level(user.getLevel())
                 .experiencePoints(user.getExperiencePoints())

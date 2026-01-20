@@ -20,7 +20,6 @@ public class UserController {
     public UserResponse register(@RequestBody RegisterRequest request) {
         User user = userService.registerUser(
                 request.getNickname(),
-                request.getEmail(),
                 request.getPassword());
         return UserResponse.from(user);
     }

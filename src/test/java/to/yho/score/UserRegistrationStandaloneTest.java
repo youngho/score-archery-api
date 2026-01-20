@@ -30,8 +30,7 @@ class UserRegistrationStandaloneTest {
     @Test
     void registerUserSuccessfully() throws Exception {
         String nickname = "testuser_" + System.currentTimeMillis();
-        String content = "{\"nickname\":\"" + nickname + "\", \"email\":\"test" + System.currentTimeMillis()
-                + "@example.com\", \"password\":\"password123\"}";
+        String content = "{\"nickname\":\"" + nickname + "\", \"password\":\"password123\"}";
 
         mockMvc.perform(post("/api/users/register")
                 .contentType(MediaType.APPLICATION_JSON)

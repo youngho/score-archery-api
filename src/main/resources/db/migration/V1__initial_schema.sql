@@ -19,7 +19,6 @@ CREATE TABLE users (
     user_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     public_id CHAR(22) NOT NULL UNIQUE,          -- 외부 노출용 ID (base62 인코딩)
     nickname VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(255) UNIQUE,
     password_hash VARCHAR(255),
     
     avatar_url VARCHAR(500),
@@ -52,7 +51,6 @@ CREATE TABLE users (
     deleted_at DATETIME NULL,
     
     INDEX idx_users_public_id (public_id),
-    INDEX idx_users_email (email),
     INDEX idx_users_nickname (nickname),
     INDEX idx_users_social (apple_id, facebook_id, google_id),
     INDEX idx_users_status (is_active, is_banned)
