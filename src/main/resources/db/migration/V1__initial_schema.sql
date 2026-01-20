@@ -18,11 +18,10 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     user_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     public_id CHAR(22) NOT NULL UNIQUE,          -- 외부 노출용 ID (base62 인코딩)
-    username VARCHAR(50) NOT NULL UNIQUE,
+    nickname VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(255) UNIQUE,
     password_hash VARCHAR(255),
     
-    display_name VARCHAR(100),
     avatar_url VARCHAR(500),
     level INT DEFAULT 1 CHECK (level >= 1),
     experience_points BIGINT DEFAULT 0 CHECK (experience_points >= 0),
@@ -54,7 +53,7 @@ CREATE TABLE users (
     
     INDEX idx_users_public_id (public_id),
     INDEX idx_users_email (email),
-    INDEX idx_users_username (username),
+    INDEX idx_users_nickname (nickname),
     INDEX idx_users_social (apple_id, facebook_id, google_id),
     INDEX idx_users_status (is_active, is_banned)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

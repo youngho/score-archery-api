@@ -19,7 +19,7 @@ public class UserController {
     @PostMapping("/register")
     public UserResponse register(@RequestBody RegisterRequest request) {
         User user = userService.registerUser(
-                request.getUsername(),
+                request.getNickname(),
                 request.getEmail(),
                 request.getPassword());
         return UserResponse.from(user);

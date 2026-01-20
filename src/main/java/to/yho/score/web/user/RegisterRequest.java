@@ -7,8 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RegisterRequest {
-    @Schema(description = "User's unique username", example = "john_doe")
-    private String username;
+    @Schema(description = "User's nickname", example = "john_doe")
+    private String nickname;
 
     @Schema(description = "User's email address", example = "john@example.com")
     private String email;

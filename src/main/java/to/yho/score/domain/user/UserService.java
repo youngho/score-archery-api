@@ -16,9 +16,9 @@ public class UserService {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Transactional
-    public User registerUser(String username, String email, String password) {
-        if (userRepository.findByUsername(username).isPresent()) {
-            throw new RuntimeException("Username already exists");
+    public User registerUser(String nickname, String email, String password) {
+        if (userRepository.findByNickname(nickname).isPresent()) {
+            throw new RuntimeException("Nickname already exists");
         }
         if (email != null && userRepository.findByEmail(email).isPresent()) {
             throw new RuntimeException("Email already exists");
@@ -26,7 +26,7 @@ public class UserService {
 
         User user = User.builder()
                 .publicId(generateUniquePublicId())
-                .username(username)
+                .nickname(nickname)
                 .email(email)
                 .passwordHash(password) // Simplified for now, should be hashed
                 .isGuest(false)

@@ -11,9 +11,8 @@ import java.time.LocalDateTime;
 @Builder
 public class UserResponse {
     private String publicId;
-    private String username;
+    private String nickname;
     private String email;
-    private String displayName;
     private String avatarUrl;
     private Integer level;
     private Long experiencePoints;
@@ -25,9 +24,8 @@ public class UserResponse {
     public static UserResponse from(User user) {
         return UserResponse.builder()
                 .publicId(user.getPublicId())
-                .username(user.getUsername())
+                .nickname(user.getNickname())
                 .email(user.getEmail())
-                .displayName(user.getDisplayName())
                 .avatarUrl(user.getAvatarUrl())
                 .level(user.getLevel())
                 .experiencePoints(user.getExperiencePoints())

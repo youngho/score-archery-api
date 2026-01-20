@@ -29,14 +29,14 @@ class UserRegistrationStandaloneTest {
 
     @Test
     void registerUserSuccessfully() throws Exception {
-        String username = "testuser_" + System.currentTimeMillis();
-        String content = "{\"username\":\"" + username + "\", \"email\":\"test" + System.currentTimeMillis()
+        String nickname = "testuser_" + System.currentTimeMillis();
+        String content = "{\"nickname\":\"" + nickname + "\", \"email\":\"test" + System.currentTimeMillis()
                 + "@example.com\", \"password\":\"password123\"}";
 
         mockMvc.perform(post("/api/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value(username));
+                .andExpect(jsonPath("$.nickname").value(nickname));
     }
 }

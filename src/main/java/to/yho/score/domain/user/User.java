@@ -28,16 +28,14 @@ public class User {
     @Column(name = "public_id", nullable = false, unique = true, length = 22)
     private String publicId;
 
-    @Schema(description = "User's unique username", example = "john_doe")
+    @Schema(description = "User's nickname", example = "john_doe")
     @Column(nullable = false, unique = true, length = 50)
-    private String username;
+    private String nickname;
 
     @Column(unique = true)
     private String email;
 
     private String passwordHash;
-
-    private String displayName;
 
     private String avatarUrl;
 
