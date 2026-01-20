@@ -214,7 +214,7 @@ CREATE TABLE stage_records (
 -- ============================================================================
 DROP TABLE IF EXISTS match_history;
 CREATE TABLE match_history (
-    match_id BIGINT AUTO_INCREMENT,
+    match_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     public_id CHAR(22) NOT NULL UNIQUE,         -- 외부 노출용 ID (base62 인코딩)
     user_id BIGINT NOT NULL,
     
@@ -243,18 +243,11 @@ CREATE TABLE match_history (
     started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     completed_at DATETIME NULL,
     
-    PRIMARY KEY (match_id, started_at),
-    
     INDEX idx_match_public_id (public_id),
     INDEX idx_match_user_time (user_id, started_at DESC),
     INDEX idx_match_stage (world_number, stage_number, difficulty),
     INDEX idx_match_completed (completed_at DESC)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-PARTITION BY RANGE (YEAR(started_at)*100 + MONTH(started_at)) (
-    PARTITION p2026_01 VALUES LESS THAN (202602),
-    PARTITION p2026_02 VALUES LESS THAN (202603),
-    PARTITION p_future VALUES LESS THAN MAXVALUE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 -- ============================================================================
