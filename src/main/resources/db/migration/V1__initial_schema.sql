@@ -6,6 +6,7 @@
 -- 통합 내용:
 -- - grok_schema의 우수한 설계 (DATETIME, BIGINT, CHECK 제약조건, 확장 가능한 인벤토리)
 -- - claude_schema의 추가 기능 (user_profiles, achievements, challenges)
+-- - 보안 강화: public_id 추가 (외부 노출용 base62 인코딩 ID, 내부는 BIGINT 사용)
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -16,6 +17,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     user_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    public_id CHAR(22) NOT NULL UNIQUE,          -- 외부 노출용 ID (base62 인코딩)
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(255) UNIQUE,
     password_hash VARCHAR(255),
@@ -50,6 +52,7 @@ CREATE TABLE users (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at DATETIME NULL,
     
+    INDEX idx_users_public_id (public_id),
     INDEX idx_users_email (email),
     INDEX idx_users_username (username),
     INDEX idx_users_social (apple_id, facebook_id, google_id),
@@ -212,6 +215,7 @@ CREATE TABLE stage_records (
 DROP TABLE IF EXISTS match_history;
 CREATE TABLE match_history (
     match_id BIGINT AUTO_INCREMENT,
+    public_id CHAR(22) NOT NULL UNIQUE,         -- 외부 노출용 ID (base62 인코딩)
     user_id BIGINT NOT NULL,
     
     world_number INT NOT NULL,
@@ -241,6 +245,7 @@ CREATE TABLE match_history (
     
     PRIMARY KEY (match_id, started_at),
     
+    INDEX idx_match_public_id (public_id),
     INDEX idx_match_user_time (user_id, started_at DESC),
     INDEX idx_match_stage (world_number, stage_number, difficulty),
     INDEX idx_match_completed (completed_at DESC)
@@ -258,6 +263,7 @@ PARTITION BY RANGE (YEAR(started_at)*100 + MONTH(started_at)) (
 DROP TABLE IF EXISTS player_achievements;
 CREATE TABLE player_achievements (
     achievement_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    public_id CHAR(22) NOT NULL UNIQUE,         -- 외부 노출용 ID (base62 인코딩)
     user_id BIGINT NOT NULL,
     achievement_type VARCHAR(100) NOT NULL,
     
@@ -280,6 +286,7 @@ CREATE TABLE player_achievements (
     UNIQUE KEY uk_achievement (user_id, achievement_type),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     
+    INDEX idx_achievements_public_id (public_id),
     INDEX idx_achievements_user (user_id),
     INDEX idx_achievements_type (achievement_type),
     INDEX idx_achievements_completed (is_completed)
@@ -416,6 +423,7 @@ CREATE TABLE shop_products (
 DROP TABLE IF EXISTS purchase_transactions;
 CREATE TABLE purchase_transactions (
     transaction_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    public_id CHAR(22) NOT NULL UNIQUE,         -- 외부 노출용 ID (base62 인코딩)
     user_id BIGINT NOT NULL,
     product_id INT,
     
@@ -443,6 +451,7 @@ CREATE TABLE purchase_transactions (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES shop_products(product_id) ON DELETE SET NULL,
     
+    INDEX idx_transactions_public_id (public_id),
     INDEX idx_transactions_user (user_id),
     INDEX idx_transactions_status (status),
     INDEX idx_transactions_store_id (store_transaction_id),
@@ -484,6 +493,7 @@ CREATE TABLE currency_log (
 DROP TABLE IF EXISTS friendships;
 CREATE TABLE friendships (
     friendship_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    public_id CHAR(22) NOT NULL UNIQUE,         -- 외부 노출용 ID (base62 인코딩)
     user_id BIGINT NOT NULL,
     friend_id BIGINT NOT NULL,
     
@@ -497,6 +507,7 @@ CREATE TABLE friendships (
     FOREIGN KEY (friend_id) REFERENCES users(user_id) ON DELETE CASCADE,
     CHECK (user_id != friend_id),
     
+    INDEX idx_friends_public_id (public_id),
     INDEX idx_friends_user (user_id),
     INDEX idx_friends_friend (friend_id),
     INDEX idx_friends_status (status)
@@ -510,3 +521,34 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- 실행 후 확인용:
 -- SHOW TABLES;
 -- SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE();
+
+-- ============================================================================
+-- public_id 사용 가이드
+-- ============================================================================
+-- 
+-- 보안을 위해 내부 DB 키(BIGINT AUTO_INCREMENT)는 외부에 노출하지 않고,
+-- public_id(CHAR(22) base62 인코딩)만 클라이언트/API에 노출합니다.
+--
+-- public_id가 추가된 테이블:
+-- - users (가장 중요)
+-- - match_history
+-- - purchase_transactions
+-- - friendships
+-- - player_achievements
+--
+-- 애플리케이션 레벨에서 public_id 생성 방법:
+-- 1. 랜덤 문자열 생성 (예: 22자리 base62)
+-- 2. UNIQUE 제약조건으로 중복 체크
+-- 3. 생성 실패 시 재시도
+--
+-- 예시 (Java):
+--   String publicId = generateBase62Id(22);
+--   // DB에 저장 시 UNIQUE 제약조건으로 중복 체크
+--
+-- 예시 (Python):
+--   import secrets
+--   import base64
+--   public_id = base64.urlsafe_b64encode(secrets.token_bytes(16))[:22].decode()
+--
+-- base62 문자셋: 0-9, A-Z, a-z (총 62자)
+-- 22자리 base62 = 약 2^131 가능한 조합 (충분히 안전)
