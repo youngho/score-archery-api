@@ -61,6 +61,40 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    /**
+     * Returns existing user or creates a guest user for score recording.
+     * Used when Unity client submits stage score with local-only account.
+     */
+    @Transactional
+    public User getOrCreateUserForScore(String publicId, String nickname) {
+        return userRepository.findByPublicId(publicId)
+                .orElseGet(() -> createGuestUser(publicId, nickname));
+    }
+
+    private User createGuestUser(String publicId, String nickname) {
+        String safeNickname = (nickname != null && !nickname.isBlank())
+                ? nicknamePolicy.sanitizeNickname(nickname)
+                : "Guest_" + (publicId.length() > 8 ? publicId.substring(0, 8) : publicId);
+        // Ensure unique nickname for guest
+        String finalNickname = ensureUniqueNickname(safeNickname);
+        User user = User.builder()
+                .publicId(publicId)
+                .nickname(finalNickname)
+                .isGuest(true)
+                .accountType(AccountType.guest)
+                .build();
+        return userRepository.save(user);
+    }
+
+    private String ensureUniqueNickname(String base) {
+        String candidate = base;
+        int suffix = 0;
+        while (userRepository.findByNickname(candidate).isPresent()) {
+            candidate = base + "_" + (++suffix);
+        }
+        return candidate;
+    }
+
     private String generateUniquePublicId() {
         while (true) {
             String candidate = generatePublicId();
