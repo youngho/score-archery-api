@@ -29,7 +29,7 @@ spring:
     out-of-order: true
 
 server:
-  port: 8080
+  port: 8081
   servlet:
     context-path: /
     encoding:
@@ -49,3 +49,17 @@ logging:
 springdoc:
   swagger-ui:
     path: /docs
+
+nickname:
+  blocked-words:
+    - 씨발
+    - 시발
+    - ㅅㅂ
+    - 병신
+    - 좆
+    - ㅈㅈ
+    - 개새끼
+    - fuck
+    - shit
+    - bitch
+    - asshole

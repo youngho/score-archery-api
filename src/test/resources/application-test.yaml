@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:score;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+
+nickname:
+  blocked-words:
+    - 씨발
+    - 시발
+    - ㅅㅂ
+    - 병신
+    - 좆
+    - ㅈㅈ
+    - 개새끼
+    - fuck
+    - shit
+    - bitch
+    - asshole

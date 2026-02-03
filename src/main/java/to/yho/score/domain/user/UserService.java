@@ -11,24 +11,47 @@ import java.security.SecureRandom;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final NicknamePolicy nicknamePolicy;
     private static final String BASE62_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final int PUBLIC_ID_LENGTH = 22;
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Transactional
     public User registerUser(String nickname, String password) {
-        if (userRepository.findByNickname(nickname).isPresent()) {
+        String sanitizedNickname = nicknamePolicy.sanitizeNickname(nickname);
+        nicknamePolicy.validateNickname(sanitizedNickname);
+        if (userRepository.findByNickname(sanitizedNickname).isPresent()) {
             throw new RuntimeException("Nickname already exists");
         }
 
         User user = User.builder()
                 .publicId(generateUniquePublicId())
-                .nickname(nickname)
+                .nickname(sanitizedNickname)
                 .passwordHash(password) // Simplified for now, should be hashed
                 .isGuest(false)
                 .accountType(AccountType.regular)
                 .build();
 
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public User changeNickname(String publicId, String newNickname) {
+        User user = getUserByPublicId(publicId);
+        String sanitizedNickname = nicknamePolicy.sanitizeNickname(newNickname);
+
+        if (sanitizedNickname.equals(user.getNickname())) {
+            return user;
+        }
+
+        nicknamePolicy.validateNickname(sanitizedNickname);
+        userRepository.findByNickname(sanitizedNickname)
+                .filter(found -> !found.getUserId().equals(user.getUserId()))
+                .ifPresent(found -> {
+                    throw new RuntimeException("Nickname already exists");
+                });
+
+        user.setNickname(sanitizedNickname);
         return userRepository.save(user);
     }
 

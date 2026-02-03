@@ -29,4 +29,12 @@ public class UserController {
     public UserResponse getByPublicId(@PathVariable String publicId) {
         return UserResponse.from(userService.getUserByPublicId(publicId));
     }
+
+    @Operation(summary = "Change nickname", description = "Updates user's nickname with duplicate and profanity checks")
+    @PatchMapping("/{publicId}/nickname")
+    public UserResponse changeNickname(@PathVariable String publicId,
+                                       @RequestBody ChangeNicknameRequest request) {
+        User user = userService.changeNickname(publicId, request.getNickname());
+        return UserResponse.from(user);
+    }
 }
