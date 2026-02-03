@@ -21,7 +21,7 @@ public class UserService {
         String sanitizedNickname = nicknamePolicy.sanitizeNickname(nickname);
         nicknamePolicy.validateNickname(sanitizedNickname);
         if (userRepository.findByNickname(sanitizedNickname).isPresent()) {
-            throw new RuntimeException("Nickname already exists");
+            throw new NicknameDuplicateException("Nickname already exists");
         }
 
         User user = User.builder()
@@ -48,7 +48,7 @@ public class UserService {
         userRepository.findByNickname(sanitizedNickname)
                 .filter(found -> !found.getUserId().equals(user.getUserId()))
                 .ifPresent(found -> {
-                    throw new RuntimeException("Nickname already exists");
+                    throw new NicknameDuplicateException("Nickname already exists");
                 });
 
         user.setNickname(sanitizedNickname);

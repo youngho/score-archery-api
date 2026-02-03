@@ -24,8 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class UserNicknameIntegrationTest {
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     private WebApplicationContext context;
@@ -47,7 +46,7 @@ class UserNicknameIntegrationTest {
         mockMvc.perform(patch("/api/users/{publicId}/nickname", publicId2)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(Map.of("nickname", nickname1))))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isConflict());
     }
 
     @Test
@@ -58,7 +57,7 @@ class UserNicknameIntegrationTest {
         mockMvc.perform(patch("/api/users/{publicId}/nickname", publicId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(Map.of("nickname", "씨발러"))))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -69,7 +68,7 @@ class UserNicknameIntegrationTest {
         mockMvc.perform(patch("/api/users/{publicId}/nickname", publicId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(Map.of("nickname", "   "))))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest());
     }
 
     @Test

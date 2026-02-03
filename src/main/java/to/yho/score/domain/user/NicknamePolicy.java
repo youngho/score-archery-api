@@ -24,13 +24,13 @@ public class NicknamePolicy {
 
     public void validateNickname(String nickname) {
         if (nickname == null || nickname.isBlank()) {
-            throw new RuntimeException("Nickname is required");
+            throw new NicknameInvalidException("Nickname is required");
         }
         if (nickname.length() > MAX_LENGTH) {
-            throw new RuntimeException("Nickname is too long");
+            throw new NicknameInvalidException("Nickname is too long");
         }
         if (containsProfanity(nickname)) {
-            throw new RuntimeException("Nickname contains profanity");
+            throw new NicknameInvalidException("Nickname contains profanity");
         }
     }
 
