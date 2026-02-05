@@ -13,7 +13,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns(
                         "http://localhost:4200", "http://127.0.0.1:4200",
                         "http://localhost", "http://127.0.0.1",
-                        "capacitor://localhost", "ionic://localhost"
+                        "capacitor://localhost", "ionic://localhost",
+                        "null",  // Unity Editor
+                        "http://158.179.161.203", "https://158.179.161.203"  // Unity client (score-archery)
                 )
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")

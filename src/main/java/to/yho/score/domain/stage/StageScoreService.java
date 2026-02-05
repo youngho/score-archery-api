@@ -120,5 +120,4 @@ public class StageScoreService {
         return builder.toString();
     }
 
-    public record StageScoreResult(boolean success, long highScore, boolean isNewRecord, int totalCompletions) {}
 }

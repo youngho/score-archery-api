@@ -196,6 +196,7 @@ CREATE TABLE stage_records (
     total_completions INT DEFAULT 0,
     first_clear_at DATETIME NULL,
     last_played_at DATETIME NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     UNIQUE KEY uk_stage_record (user_id, world_number, stage_number, difficulty),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,

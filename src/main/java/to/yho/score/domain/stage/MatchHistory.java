@@ -44,7 +44,7 @@ public class MatchHistory {
     @Builder.Default
     private Boolean isCompleted = true;
 
-    @Column(name = "stars_earned")
+    @Column(name = "stars_earned", columnDefinition = "TINYINT")
     @Builder.Default
     private Integer starsEarned = 0;
 

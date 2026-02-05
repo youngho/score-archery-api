@@ -39,7 +39,7 @@ public class StageRecord {
     @Builder.Default
     private Difficulty difficulty = Difficulty.normal;
 
-    @Column(name = "stars_earned")
+    @Column(name = "stars_earned", columnDefinition = "TINYINT")
     @Builder.Default
     private Integer starsEarned = 0;
 
