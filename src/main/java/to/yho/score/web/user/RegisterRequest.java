@@ -10,6 +10,6 @@ public class RegisterRequest {
     @Schema(description = "User's nickname", example = "john_doe")
     private String nickname;
 
-    @Schema(description = "User's password", example = "password123")
-    private String password;
+    @Schema(description = "User's publicId", example = "6oUVldX15FnaVYvwxamrY9")
+    private String publicId;
 }

@@ -17,15 +17,16 @@ public class UserService {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Transactional
-    public User registerUser(String nickname, String password) {
+    public User registerUser(String nickname, String publicId) {
         String sanitizedNickname = nicknamePolicy.sanitizeNickname(nickname);
         nicknamePolicy.validateNickname(sanitizedNickname);
+        String password = "";
         if (userRepository.findByNickname(sanitizedNickname).isPresent()) {
             throw new NicknameDuplicateException("Nickname already exists");
         }
 
         User user = User.builder()
-                .publicId(generateUniquePublicId())
+                .publicId(publicId)
                 .nickname(sanitizedNickname)
                 .passwordHash(password) // Simplified for now, should be hashed
                 .isGuest(false)
@@ -93,15 +94,6 @@ public class UserService {
             candidate = base + "_" + (++suffix);
         }
         return candidate;
-    }
-
-    private String generateUniquePublicId() {
-        while (true) {
-            String candidate = generatePublicId();
-            if (!userRepository.existsByPublicId(candidate)) {
-                return candidate;
-            }
-        }
     }
 
     private String generatePublicId() {
