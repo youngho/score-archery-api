@@ -2,9 +2,11 @@ package to.yho.score.web.stage;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import to.yho.score.domain.session.SessionService;
 import to.yho.score.domain.stage.StageScoreResult;
 import to.yho.score.domain.stage.StageScoreService;
 
@@ -15,10 +17,15 @@ import to.yho.score.domain.stage.StageScoreService;
 public class StageScoreController {
 
     private final StageScoreService stageScoreService;
+    private final SessionService sessionService;
 
     @Operation(summary = "Record stage score", description = "Records user's score when a stage is completed")
     @PostMapping("/record")
-    public ResponseEntity<StageScoreRecordResponse> recordScore(@RequestBody StageScoreRecordRequest request) {
+    public ResponseEntity<StageScoreRecordResponse> recordScore(@RequestBody StageScoreRecordRequest request,
+                                                                HttpServletRequest httpRequest) {
+        if (request.getPublicId() != null && !request.getPublicId().isBlank()) {
+            sessionService.createOrRefreshSession(request.getPublicId(), httpRequest.getHeader("X-Device-Type"), null, httpRequest.getRemoteAddr());
+        }
         if (request.getPublicId() == null || request.getPublicId().isBlank()) {
             return ResponseEntity.badRequest()
                     .body(StageScoreRecordResponse.builder()

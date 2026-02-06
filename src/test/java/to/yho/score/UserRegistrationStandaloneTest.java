@@ -2,12 +2,14 @@ package to.yho.score;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import to.yho.score.domain.session.SessionService;
 import to.yho.score.domain.user.UserService;
 import to.yho.score.web.user.UserController;
 
@@ -28,7 +30,8 @@ class UserRegistrationStandaloneTest {
 
     @BeforeEach
     void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new UserController(userService)).build();
+        SessionService sessionService = Mockito.mock(SessionService.class);
+        mockMvc = MockMvcBuilders.standaloneSetup(new UserController(userService, sessionService)).build();
     }
 
     @Test
