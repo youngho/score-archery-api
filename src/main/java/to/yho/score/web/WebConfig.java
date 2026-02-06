@@ -1,7 +1,9 @@
 package to.yho.score.web;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -32,11 +34,10 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     /**
-     * CORS 필터를 적용해 오류 응답(4xx/5xx)에도 Access-Control-Allow-Origin 헤더가 포함되도록 함.
-     * MVC CORS 설정만으로는 에러 응답 시 헤더가 빠져 브라우저에서 CORS 오류가 발생할 수 있음.
+     * CORS 필터를 최우선 적용해 모든 응답(정상/4xx/5xx)에 Access-Control-Allow-Origin 헤더가 포함되도록 함.
      */
     @Bean
-    public CorsFilter corsFilter() {
+    public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.setAllowedOriginPatterns(ALLOWED_ORIGINS);
@@ -46,6 +47,8 @@ public class WebConfig implements WebMvcConfigurer {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
 
-        return new CorsFilter(source);
+        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return bean;
     }
 }
