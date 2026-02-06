@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -84,9 +85,11 @@ class UserNicknameIntegrationTest {
     }
 
     private String registerUser(String nickname) throws Exception {
+        String publicId = UUID.randomUUID().toString().replace("-", "").substring(0, 22);
         String content = objectMapper.writeValueAsString(Map.of(
                 "nickname", nickname,
-                "password", "password123"
+                "password", "password123",
+                "publicId", publicId
         ));
 
         MvcResult result = mockMvc.perform(post("/api/users/register")

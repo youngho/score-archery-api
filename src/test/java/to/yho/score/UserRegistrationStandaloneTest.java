@@ -11,6 +11,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import to.yho.score.domain.user.UserService;
 import to.yho.score.web.user.UserController;
 
+import java.util.UUID;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,7 +34,8 @@ class UserRegistrationStandaloneTest {
     @Test
     void registerUserSuccessfully() throws Exception {
         String nickname = "testuser_" + System.currentTimeMillis();
-        String content = "{\"nickname\":\"" + nickname + "\", \"password\":\"password123\"}";
+        String publicId = UUID.randomUUID().toString().replace("-", "").substring(0, 22);
+        String content = "{\"nickname\":\"" + nickname + "\", \"password\":\"password123\", \"publicId\":\"" + publicId + "\"}";
 
         mockMvc.perform(post("/api/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
