@@ -14,8 +14,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,10 +47,27 @@ public class LeaderboardService {
         List<Long> userIds = rows.stream().map(StageRecordRepository.LeaderboardScoreRow::getUserId).toList();
         Map<Long, User> users = userRepository.findAllById(userIds).stream().collect(Collectors.toMap(User::getUserId, u -> u));
 
+        Map<Long, MatchHistoryRepository.UserMatchAggregateRow> aggByUser = Map.of();
+        Map<Long, String> lastStageByUser = Map.of();
+        if (!userIds.isEmpty()) {
+            aggByUser = matchHistoryRepository.findAggregatesForUsers(userIds).stream()
+                    .filter(Objects::nonNull)
+                    .filter(a -> a.getUserId() != null)
+                    .collect(Collectors.toMap(MatchHistoryRepository.UserMatchAggregateRow::getUserId, a -> a, (a, b) -> a));
+            lastStageByUser = new HashMap<>();
+            for (MatchHistoryRepository.UserLastStageRow r : matchHistoryRepository.findLastStageSceneNamesForUsers(userIds)) {
+                if (r != null && r.getUserId() != null) {
+                    lastStageByUser.put(r.getUserId(), r.getLastStageSceneName());
+                }
+            }
+        }
+
         List<LeaderboardEntryResponse> entries = new ArrayList<>();
         for (int i = 0; i < rows.size(); i++) {
             StageRecordRepository.LeaderboardScoreRow row = rows.get(i);
             User user = users.get(row.getUserId());
+            Long uid = row.getUserId();
+            MatchHistoryRepository.UserMatchAggregateRow agg = uid != null ? aggByUser.get(uid) : null;
             entries.add(LeaderboardEntryResponse.builder()
                     .rank(offset + i + 1)
                     .playerName(user != null ? user.getNickname() : "?")
@@ -56,6 +75,11 @@ public class LeaderboardService {
                     .avatar(user != null ? user.getAvatarUrl() : null)
                     .country(null)
                     .extra(user != null ? user.getLevel() : null)
+                    .gameCount(null)
+                    .avgScorePerMatch(agg != null ? round2(agg.getAvgMatchScore()) : null)
+                    .avgAccuracy(agg != null ? round2(agg.getAvgAccuracy()) : null)
+                    .avgArrowsPerMatch(agg != null ? round2(agg.getAvgArrowsPerMatch()) : null)
+                    .lastStageSceneName(uid != null ? lastStageByUser.get(uid) : null)
                     .build());
         }
         return LeaderboardResponse.builder().entries(entries).total(total).build();
@@ -99,9 +123,11 @@ public class LeaderboardService {
             long gameCount = row.getGameCount() != null ? row.getGameCount() : 0L;
             long maxScore = row.getMaxScore() != null ? row.getMaxScore() : 0L;
 
+            Double avgScorePerMatch = gameCount > 0 ? round2(totalScore / (double) gameCount) : null;
+
             Object extra = switch (periodKind) {
                 case "monthly" -> gameCount;
-                case "weekly" -> (gameCount > 0) ? (totalScore / gameCount) : 0L;
+                case "weekly" -> null;
                 case "daily" -> maxScore;
                 default -> null;
             };
@@ -113,8 +139,20 @@ public class LeaderboardService {
                     .avatar(user != null ? user.getAvatarUrl() : null)
                     .country(null)
                     .extra(extra)
+                    .gameCount(gameCount > 0 ? gameCount : null)
+                    .avgScorePerMatch(avgScorePerMatch)
+                    .avgAccuracy(round2(row.getAvgAccuracy()))
+                    .avgArrowsPerMatch(round2(row.getAvgArrowsPerMatch()))
+                    .lastStageSceneName(row.getLastStageSceneName())
                     .build());
         }
         return LeaderboardResponse.builder().entries(entries).total(total).build();
+    }
+
+    private static Double round2(Double v) {
+        if (v == null || v.isNaN() || v.isInfinite()) {
+            return null;
+        }
+        return Math.round(v * 100.0) / 100.0;
     }
 }
