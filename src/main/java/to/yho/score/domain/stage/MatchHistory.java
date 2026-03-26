@@ -35,6 +35,9 @@ public class MatchHistory {
     @Column(name = "stage_number", nullable = false)
     private Integer stageNumber;
 
+    @Column(name = "stage_scene_name", length = 64)
+    private String stageSceneName;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

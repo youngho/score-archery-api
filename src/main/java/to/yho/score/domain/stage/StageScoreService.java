@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import to.yho.score.domain.user.User;
 import to.yho.score.domain.user.UserService;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
@@ -24,9 +26,18 @@ public class StageScoreService {
     @Transactional
     public StageScoreResult recordScore(String publicId, String nickname,
                                         int worldNumber, int stageNumber, long score,
-                                        Integer starsEarned, Integer playDurationSeconds, String difficultyStr) {
+                                        Integer starsEarned, Integer playDurationSeconds, String difficultyStr,
+                                        String stageSceneName,
+                                        Integer totalArrowsUsed,
+                                        Integer arrowsHit,
+                                        Double accuracyClient) {
         User user = userService.getOrCreateUserForScore(publicId, nickname);
         Difficulty difficulty = parseDifficulty(difficultyStr);
+
+        String sceneKey = blankToNull(stageSceneName);
+        Integer normHits = normalizeHits(totalArrowsUsed, arrowsHit);
+        Integer arrowsMissed = computeArrowsMissed(totalArrowsUsed, normHits);
+        BigDecimal accuracy = resolveAccuracy(totalArrowsUsed, normHits, accuracyClient);
 
         // Insert match_history
         String matchPublicId = generateUniqueMatchPublicId();
@@ -35,10 +46,15 @@ public class StageScoreService {
                 .userId(user.getUserId())
                 .worldNumber(worldNumber)
                 .stageNumber(stageNumber)
+                .stageSceneName(sceneKey)
                 .difficulty(difficulty)
                 .isCompleted(true)
                 .starsEarned(starsEarned != null ? Math.min(3, Math.max(0, starsEarned)) : 0)
                 .finalScore(score)
+                .totalArrowsUsed(totalArrowsUsed)
+                .arrowsHit(normHits)
+                .arrowsMissed(arrowsMissed)
+                .accuracy(accuracy)
                 .playDurationSeconds(playDurationSeconds)
                 .completedAt(LocalDateTime.now())
                 .build();
@@ -62,6 +78,7 @@ public class StageScoreService {
                     .starsEarned(starsEarned != null ? Math.min(3, Math.max(0, starsEarned)) : 0)
                     .highScore(score)
                     .bestTimeSeconds(playDurationSeconds)
+                    .bestAccuracy(accuracy)
                     .totalAttempts(1)
                     .totalCompletions(1)
                     .firstClearAt(LocalDateTime.now())
@@ -86,11 +103,48 @@ public class StageScoreService {
                     || playDurationSeconds < record.getBestTimeSeconds())) {
                 record.setBestTimeSeconds(playDurationSeconds);
             }
+            if (accuracy != null && (record.getBestAccuracy() == null
+                    || accuracy.compareTo(record.getBestAccuracy()) > 0)) {
+                record.setBestAccuracy(accuracy);
+            }
         }
 
         stageRecordRepository.save(record);
 
         return new StageScoreResult(true, highScore, isNewRecord, record.getTotalCompletions());
+    }
+
+    private static String blankToNull(String s) {
+        return (s == null || s.isBlank()) ? null : s.trim();
+    }
+
+    private static Integer normalizeHits(Integer totalArrowsUsed, Integer arrowsHit) {
+        if (arrowsHit == null) {
+            return null;
+        }
+        int h = Math.max(0, arrowsHit);
+        if (totalArrowsUsed == null) {
+            return h;
+        }
+        return Math.min(h, Math.max(0, totalArrowsUsed));
+    }
+
+    private static Integer computeArrowsMissed(Integer totalArrowsUsed, Integer normHits) {
+        if (totalArrowsUsed == null || normHits == null) {
+            return null;
+        }
+        return Math.max(0, totalArrowsUsed - normHits);
+    }
+
+    private static BigDecimal resolveAccuracy(Integer totalArrowsUsed, Integer normHits, Double accuracyClient) {
+        if (accuracyClient != null && !accuracyClient.isNaN() && !accuracyClient.isInfinite()) {
+            BigDecimal a = BigDecimal.valueOf(accuracyClient).setScale(2, RoundingMode.HALF_UP);
+            return a.max(BigDecimal.ZERO).min(new BigDecimal("100"));
+        }
+        if (totalArrowsUsed != null && totalArrowsUsed > 0 && normHits != null) {
+            return BigDecimal.valueOf(normHits * 100.0 / totalArrowsUsed).setScale(2, RoundingMode.HALF_UP);
+        }
+        return null;
     }
 
     private Difficulty parseDifficulty(String s) {

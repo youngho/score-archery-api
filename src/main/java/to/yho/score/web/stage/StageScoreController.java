@@ -53,7 +53,11 @@ public class StageScoreController {
                 request.getScore(),
                 request.getStarsEarned(),
                 request.getPlayDurationSeconds(),
-                request.getDifficulty()
+                request.getDifficulty(),
+                request.getStageSceneName(),
+                request.getTotalArrowsUsed(),
+                request.getArrowsHit(),
+                request.getAccuracy()
         );
 
         return ResponseEntity.ok(StageScoreRecordResponse.builder()

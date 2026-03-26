@@ -34,4 +34,16 @@ public class StageScoreRecordRequest {
 
     @Schema(description = "Difficulty level", example = "normal")
     private String difficulty;
+
+    @Schema(description = "Unity scene / build name (e.g. 01Scarecrow) — stored per play for analytics", example = "04Balloon")
+    private String stageSceneName;
+
+    @Schema(description = "Total arrows shot this run (for hit rate)", example = "12")
+    private Integer totalArrowsUsed;
+
+    @Schema(description = "Arrow hits (scoring contacts) this run", example = "8")
+    private Integer arrowsHit;
+
+    @Schema(description = "Optional client-computed accuracy 0–100; if omitted, server derives from arrows when possible", example = "66.67")
+    private Double accuracy;
 }
