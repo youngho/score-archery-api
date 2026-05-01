@@ -24,20 +24,11 @@ public class WebConfig implements WebMvcConfigurer {
             "http://158.179.161.203:80", "http://158.179.161.203:443"
     );
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
-                .allowedOriginPatterns(ALLOWED_ORIGINS.toArray(new String[0]))
-                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true);
-    }
-
     /**
      * CORS 필터를 최우선 적용해 모든 응답(정상/4xx/5xx)에 Access-Control-Allow-Origin 헤더가 포함되도록 함.
      */
     @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
+    public FilterRegistrationBean<CorsFilter> corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.setAllowedOriginPatterns(ALLOWED_ORIGINS);
@@ -48,6 +39,7 @@ public class WebConfig implements WebMvcConfigurer {
         source.registerCorsConfiguration("/api/**", config);
 
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
+        bean.setName("scoreCorsFilter");
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
     }
